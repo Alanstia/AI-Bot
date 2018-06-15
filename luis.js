@@ -32,9 +32,23 @@ function getLuisIntent(utterance,callback) {
                 console.log(err);
             else {
                 var data = JSON.parse(body);
-
-                //console.log(`Query: ${data.query}`);
-                //console.log(`Top Intent: ${data.topScoringIntent.intent}`);
+                
+                console.log(`Query: ${data.query}`);
+                console.log(`Top Intent: ${data.topScoringIntent.intent}`);
+                if(data.topScoringIntent.intent=='打招呼'){
+                    callback('您好，我是人工智慧點餐系統，代號為002，很高興為您服務!');
+                }
+                else if(data.topScoringIntent.intent=='點餐'){
+                    callback('好的，已為您點了'+data.entities[0].entity+data.entities[1].entity);
+                }
+                else if(data.topScoringIntent.intent=='結帳'){
+                    callback('謝謝惠顧');
+                }
+                else if(data.topScoringIntent.intent=='None'){
+                    callback("不好意思，我目前聽不懂這個詞呢");
+                }
+                
+                
                 //console.log('Intents:');
                 //console.log(data.intents);
             }
