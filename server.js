@@ -2,7 +2,7 @@ const express = require('express');
 const app = express(); //建立一個Express伺服器
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-//var getLuisIntent = require('./luis');
+var getLuisIntent = require('./luis');
 var userpool=[];
 
 
@@ -47,11 +47,13 @@ io.on('connection', (socket) => {
         var temp=msg.split(" ");
         if(temp[0]=='!機器人幫我')
        {
-          /* getLuisIntent(msg,function(data){
-            socket.emit("luis",data.topScoringIntent.intent);
-           })*/
+           getLuisIntent(temp[1],function(msg){
+               socket.emit("luis",'機器人',msg,'blue');
+            })
        }
-		socket.broadcast.emit('postMsg',socket.nickname,msg,color);
+       else{
+        socket.broadcast.emit('postMsg',socket.nickname,msg,color);
+       }
     });	
 
 
