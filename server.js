@@ -40,16 +40,24 @@ io.on('connection', (socket) => {
         console.log(socket.nickname+'Bye~');  // 顯示 bye~
     }); 
     
-    
+    var sum_price = 0;
     //發生send事件
 	socket.on("send", (msg,color) => {
         //io.emit('postMsg','io',msg);
         var temp=msg.split(" ");
         if(temp[0]=='!機器人幫我')
        {
-           getLuisIntent(temp[1],function(msg){
+		   if(temp[1] != null)
+		   {
+			getLuisIntent(temp[1],function(msg,price,check){
                socket.emit("luis",'機器人',msg,'blue');
+			   sum_price = sum_price + price;
+			   if(check == true)
+			   {
+					socket.emit("luis",'機器人','目前總金額為'+sum_price,'blue');
+			   }
             })
+		   }
        }
        else{
         socket.broadcast.emit('postMsg',socket.nickname,msg,color);
