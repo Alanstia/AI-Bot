@@ -49,12 +49,16 @@ io.on('connection', (socket) => {
        {
 		   if(temp[1] != null)
 		   {
-			getLuisIntent(temp[1],function(msg,price,check){
+			getLuisIntent(temp[1],function(msg,price,check,closing){
                socket.emit("luis",'機器人',msg,'blue');
 			   sum_price = sum_price + price;
 			   if(check == true)
 			   {
-					socket.emit("luis",'機器人','目前總金額為'+sum_price,'blue');
+					socket.emit("luis",'機器人','目前總金額為'+sum_price+'元','blue');
+			   }
+			   else if(closing == true)
+			   {
+					socket.emit("luis",'機器人','總共是'+sum_price+'元，謝謝惠顧','blue');
 			   }
             })
 		   }
