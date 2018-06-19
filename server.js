@@ -4,7 +4,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 var getLuisIntent = require('./luis');
 var userpool=[];
-
+var goods_count = {起士漢堡:0,奶茶:0,麥香雞:0}; //點餐的數量，預設為0
 
 io.on('connection', (socket) => {
     //socket是指連入的這個socket
@@ -49,11 +49,22 @@ io.on('connection', (socket) => {
        {
 		   if(temp[1] != null)
 		   {
-			getLuisIntent(temp[1],function(msg,price,check,closing){
+			getLuisIntent(temp[1],function(msg,price,count,check,closing){
                socket.emit("luis",'機器人',msg,'blue');
 			   sum_price = sum_price + price;
 			   if(check == true)
 			   {
+					for(var i in count)
+					{
+						goods_count[i] = goods_count[i] + count[i];
+						if(goods_count[i] < 0) //數量不能為負
+						{
+							goods_count[i] = goods_count[i] - count[i];
+							socket.emit("luis",'機器人','不好意思，這邊發現您點了'+i+goods_count[i]+'個，不能取消'+(-count[i])+'個','blue');
+							sum_price = sum_price - price;
+							break;
+						}
+					}
 					socket.emit("luis",'機器人','目前總金額為'+sum_price+'元','blue');
 			   }
 			   else if(closing == true)
