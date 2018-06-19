@@ -22,6 +22,7 @@ function getLuisIntent(utterance,callback) {
     }
 	
 	var goods = {起士漢堡:50,奶茶:30,麥香雞:55}; //菜單
+	var goods_count = {起士漢堡:0,奶茶:0,麥香雞:0}; //點餐的數量，預設為0
 	var price = 0; //總金額
     var luisRequest =endpoint + luisAppId +'?' + querystring.stringify(queryParams);
 	//中文數字轉成int
@@ -103,26 +104,33 @@ function getLuisIntent(utterance,callback) {
 						var count = data.entities.filter(function(item) {
 							return item.type == "量詞";
 						});
-						
+
 						try
 						{
 							var int_quantity = ChineseToNumber(quantity[0].entity); //中文數字轉成int
 						}
 						catch(err)
 						{
-							callback('抱歉!請您說清楚一點，請附上中文數量(一個,三杯...etc)',price,false,false);
+							callback('抱歉!請您說清楚一點，請附上中文數量(一個,三杯...etc)',price,goods_count,false,false);
 							return;
 						}
-						callback('好的，已為您點了'+quantity[0].entity+count[0].entity+sales[0].entity,price,false,false);
-						if(typeof goods[sales[0].entity] !== 'undefined') //計算金額
+						if(typeof goods[sales[0].entity] !== 'undefined') //計算金額和數量
 						{
+							callback('好的，已為您點了'+quantity[0].entity+count[0].entity+sales[0].entity,price,goods_count,false,false);
+							//計算數量
+							goods_count[sales[0].entity] = int_quantity;
+							//計算金額
 							price = price + (goods[sales[0].entity]*int_quantity);
-							callback('您點了'+goods[sales[0].entity]*int_quantity+'元',price,true,false);
+							callback('您點了'+goods[sales[0].entity]*int_quantity+'元',price,goods_count,true,false);
+						}
+						else
+						{
+							callback('抱歉!沒有這項商品呢',price,goods_count,false,false);
 						}
 					}
 					else
 					{
-						callback('抱歉!請您說清楚一點，請附上中文數量(一個,三杯...etc)',price,false,false);
+						callback('抱歉!請您說清楚一點，請附上中文數量(一個,三杯...etc)',price,goods_count,false,false);
 					}
                 }
 				else if(data.topScoringIntent.intent=='取消商品')
@@ -138,33 +146,40 @@ function getLuisIntent(utterance,callback) {
 						var count = data.entities.filter(function(item) {
 							return item.type == "量詞";
 						});
-
+						
 						try
 						{
 							var int_quantity2 = ChineseToNumber(quantity[0].entity); //中文數字轉成int
 						}
 						catch(err)
 						{
-							callback('抱歉!請您說清楚一點，您是要取消多少呢?',price,false,false);
+							callback('抱歉!請您說清楚一點，您是要取消多少呢?',price,goods_count,false,false);
 							return;
 						}
 						if(typeof goods[sales[0].entity] !== 'undefined') //計算金額
 						{
+							//計算數量
+							goods_count[sales[0].entity] = -int_quantity2;
+							//計算金額
 							price = price + (goods[sales[0].entity]*int_quantity2);
 							price = price*(-1);
-							callback('好的，已為您取消了'+quantity[0].entity+count[0].entity+sales[0].entity,price,true,false);
+							callback('好的，為您取消'+quantity[0].entity+count[0].entity+sales[0].entity,price,goods_count,true,false);
+						}
+						else
+						{
+							callback('抱歉!沒有這項商品呢',price,goods_count,false,false);
 						}
 					}
 					else
 					{
-						callback('抱歉!請您說清楚一點，您是要取消多少呢?',price,false,false);
+						callback('抱歉!請您說清楚一點，您是要取消多少呢?',price,goods_count,false,false);
 					}
 				}
                 else if(data.topScoringIntent.intent=='結帳'){
-                    callback('您的訂單已完成',price,false,true);
+                    callback('您的訂單已完成',price,goods_count,false,true);
                 }
                 else if(data.topScoringIntent.intent=='None'){
-                    callback("不好意思，請您說清楚一點",price,false,false);
+                    callback("不好意思，請您說清楚一點",price,goods_count,false,false);
                 }
                 
                 
