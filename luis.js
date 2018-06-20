@@ -100,9 +100,9 @@ function getLuisIntent(utterance,callback) {
 					var good_string = '';
 					for(var i in goods) //顯示菜單
 					{
-						good_string = good_string + i + ': ' + goods[i] + '\n';
+						good_string = good_string + i + ': ' + goods[i] + '<br>';
 					}
-					callback('以下是菜單的部分\n'+good_string,price,goods_count,false,false,false);
+					callback('以下是菜單的部分<br>'+good_string,price,goods_count,false,false,false);
                 }
                 else if(data.topScoringIntent.intent=='點餐'){
 					var sales = data.entities.filter(function(item) {
