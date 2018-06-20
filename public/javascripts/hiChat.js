@@ -1,5 +1,4 @@
-﻿
-window.onload = function() {
+﻿window.onload = function() {
     //載入時初始化
     var hichat = new HiChat();
     hichat.init();
@@ -31,8 +30,14 @@ HiChat.prototype = {
 				var nickName = document.getElementById('nicknameInput').value;
 				//檢查輸入框是否為空
 				if (nickName.trim().length != 0) {
-				//不為空發送login到server
-                that.socket.emit('login', nickName);
+                    if(nickName.trim().length>20){
+                        document.getElementById('info').textContent = 'ID太長';
+                        document.getElementById('nicknameInput').value='';
+                    }
+                    else{
+                        that.socket.emit('login', nickName);
+                        //不為空發送login到server&小於20
+                    }
 				} 
 				else {
 				//空
@@ -101,6 +106,7 @@ HiChat.prototype = {
                 var messageInput = document.getElementById('messageInput'),
                     msg = messageInput.value,
                     color = document.getElementById('colorStyle').value;
+                    msg=msg.replace(/[\r\n]/g,"");//去掉回车换行
                 if (e.keyCode == 13 && msg.trim().length != 0) {
                     messageInput.value = '';
                     that.socket.emit('send', msg, color);
@@ -152,22 +158,60 @@ HiChat.prototype = {
         if(user=='system')
         {
             msgToDisplay.innerHTML=user+'<span class="timespan">(' + date + '): </span>' + msg;
-            msgToDisplay.style.marginLeft='100px';
+            if(msg.length>11){
+                msgToDisplay.style.height='40px';
+            }
+            msgToDisplay.style.marginLeft='350px';
         }
         else if(user=='me')
-        {
-            msgToDisplay.innerHTML='<span class="arrow_r_int"></span><span class="arrow_r_out"></span>' +user + '<span class="timespan">(' + date + '): </span>' + msg;
-            msgToDisplay.style.marginLeft='150px';
+        {  
+            msgToDisplay.innerHTML='<span class="arrow_r_int"></span><span class="arrow_r_out"></span>' +user + '<span class="timespan">(' + date + '): </span>';
+
+            if(msg.length>37){
+                //已中文標準去算
+               
+                msgToDisplay.innerHTML+=msg.slice(0,37)+'<br>'+msg.slice(38,83);
+                
+                msgToDisplay.style.height='40px';
+                msgToDisplay.style.width='734px';
+                msgToDisplay.style.marginLeft='185px';
+                if(msg.length>83){
+                    msgToDisplay.innerHTML+='<br>'+msg.slice(84);
+                    msgToDisplay.style.height=20+15*(msg.length/37)+'px';
+                }
+            }
+             else{
+                msgToDisplay.innerHTML+=msg;
+                msgToDisplay.style.width=110+16*msg.length+"px";//輸入框長度
+                msgToDisplay.style.marginLeft=920-(110+16*msg.length)+"px";//調整位置隨msg長度
+            }
+            
         }
         else{
-        msgToDisplay.innerHTML= '<span class="arrow_l_int"></span><span class="arrow_l_out"></span>' +user + '<span class="timespan">(' + date + '): </span>' + msg;
+            msgToDisplay.innerHTML= '<span class="arrow_l_int"></span><span class="arrow_l_out"></span>' +user + '<span class="timespan">(' + date + '): </span>';
+            if(msg.length>37){
+                //已中文標準去算
+               
+                msgToDisplay.innerHTML+=msg.slice(0,37)+'<br>'+msg.slice(38,83);
+                
+                msgToDisplay.style.height='40px';
+                msgToDisplay.style.width='734px';
+                
+                if(msg.length>83){
+                    msgToDisplay.innerHTML+='<br>'+msg.slice(84);
+                    msgToDisplay.style.height=20+15*(msg.length/37)+'px';
+                }
+            }else{
+                msgToDisplay.innerHTML+=msg;
+                msgToDisplay.style.width=100+16*(user.length+msg.length)+"px";//輸入框長度
+            }
+       
+        
         }
        
         msgToDisplay.style.color = color || '#000';
-        console.log(msgToDisplay);
-        /*if(user=='me'){
-            msgToDisplay.style.paddingLeft='200px';
-        }*/
+        
+        
         container.appendChild(msgToDisplay);
         container.scrollTop = container.scrollHeight;
     },
