@@ -102,6 +102,7 @@ function getLuisIntent(utterance,callback) {
 					{
 						good_string = good_string + i + ': ' + goods[i] + '<br>';
 					}
+					good_string = good_string.substring(0, good_string.length-4);//去除最後一個<br>
 					callback('以下是菜單的部分<br>'+good_string,price,goods_count,false,false,false);
                 }
                 else if(data.topScoringIntent.intent=='點餐'){
@@ -160,7 +161,7 @@ function getLuisIntent(utterance,callback) {
 					var count = data.entities.filter(function(item) {
 						return item.type == "量詞";
 					});
-					if(sales.length > 0 && quantity.length > 0 && count.length > 0)//做到這---------------------------
+					if(sales.length > 0 && quantity.length > 0 && count.length > 0)
 					{
 						try
 						{
