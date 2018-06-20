@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
 					{
 						if(goods_count[i] != 0)
 						{
-							good_str = good_str + i + ': ' + goods_count[i] + '\n';
+							good_str = good_str + i + ': ' + goods_count[i] + '<br>';
 						}
 					}
 					if(good_str == '')
