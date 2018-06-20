@@ -1,9 +1,19 @@
 require('dotenv').config();
-
+//var getMenu = require('./mysql');
 var request = require('request');
+var getWeather=require('./crawler');
 var querystring = require('querystring');
+var weather=new Array();
+var temp=0;
 
-function getLuisIntent(utterance,callback) {
+getWeather(function(data){
+	weather.push(data);
+});
+/*getMenu(function(result){
+	console.log(result);
+});*/
+function getLuisIntent(utterance,callback,callbackweather) {
+	
     var endpoint =
         "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/";
 
@@ -96,14 +106,15 @@ function getLuisIntent(utterance,callback) {
                 console.log(`Query: ${data.query}`);
                 console.log(`Top Intent: ${data.topScoringIntent.intent}`);
                 if(data.topScoringIntent.intent=='打招呼'){
+					
                     callback('您好，我是人工智慧點餐系統，代號為002，很高興為您服務!',price,goods_count,false,false,false);
 					var good_string = '';
 					for(var i in goods) //顯示菜單
 					{
 						good_string = good_string + i + ': ' + goods[i] + '<br>';
 					}
-					good_string = good_string.substring(0, good_string.length-4);//去除最後一個<br>
 					callback('以下是菜單的部分<br>'+good_string,price,goods_count,false,false,false);
+					
                 }
                 else if(data.topScoringIntent.intent=='點餐'){
 					var sales = data.entities.filter(function(item) {
@@ -161,7 +172,7 @@ function getLuisIntent(utterance,callback) {
 					var count = data.entities.filter(function(item) {
 						return item.type == "量詞";
 					});
-					if(sales.length > 0 && quantity.length > 0 && count.length > 0)
+					if(sales.length > 0 && quantity.length > 0 && count.length > 0)//做到這---------------------------
 					{
 						try
 						{
@@ -214,10 +225,14 @@ function getLuisIntent(utterance,callback) {
 				}
                 else if(data.topScoringIntent.intent=='結帳'){
                     callback('您的訂單已完成',price,goods_count,false,true,false);
-                }
+				}
+				else if(data.topScoringIntent.intent=='推薦'){
+					callbackweather(weather[0],weather[2],weather[3]);
+				}
                 else if(data.topScoringIntent.intent=='None'){
                     callback("不好意思，請您說清楚一點",price,goods_count,false,false,false);
-                }
+				}
+				
                 
                 
                 //console.log('Intents:');
