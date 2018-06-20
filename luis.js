@@ -113,6 +113,7 @@ function getLuisIntent(utterance,callback,callbackweather) {
 					{
 						good_string = good_string + i + ': ' + goods[i] + '<br>';
 					}
+					good_string = good_string.substring(0, good_string.length-4);//去除最後一個<br>
 					callback('以下是菜單的部分<br>'+good_string,price,goods_count,false,false,false);
 					
                 }
