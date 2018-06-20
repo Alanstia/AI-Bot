@@ -4,6 +4,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 var getLuisIntent = require('./luis');
 var userpool=[];
+var goods = {起士漢堡:50,奶茶:30,麥香雞:55}; //菜單
 var goods_count = {起士漢堡:0,奶茶:0,麥香雞:0}; //點餐的數量，預設為0
 
 io.on('connection', (socket) => {
@@ -49,22 +50,54 @@ io.on('connection', (socket) => {
        {
 		   if(temp[1] != null)
 		   {
-			getLuisIntent(temp[1],function(msg,price,count,check,closing){
-               socket.emit("luis",'機器人',msg,'blue');
-			   sum_price = sum_price + price;
-			   if(check == true)
-			   {
-					for(var i in count)
+			getLuisIntent(temp[1],function(msg,price,count,check,closing,check_good){
+				if(check_good == false)
+				{
+					socket.emit("luis",'機器人',msg,'blue');
+				}
+				else
+				{
+					var good_str = '';
+					for(var i in goods_count)
 					{
-						goods_count[i] = goods_count[i] + count[i];
-						if(goods_count[i] < 0) //數量不能為負
+						if(goods_count[i] != 0)
 						{
-							goods_count[i] = goods_count[i] - count[i];
-							socket.emit("luis",'機器人','不好意思，這邊發現您點了'+i+goods_count[i]+'個，不能取消'+(-count[i])+'個','blue');
-							sum_price = sum_price - price;
-							break;
+							good_str = good_str + i + ': ' + goods_count[i] + '\n';
 						}
 					}
+					if(good_str == '')
+					{
+						socket.emit("luis",'機器人','您沒有點任何餐點呢','blue');
+					}
+					else
+					{
+						socket.emit("luis",'機器人','以下是您點的餐點','blue');
+						socket.emit("luis",'機器人',good_str,'blue');
+						socket.emit("luis",'機器人','目前總金額為'+sum_price+'元','blue');
+					}
+				}
+				sum_price = sum_price + price;
+				if(check == true)
+				{
+					if(typeof count !== 'string')
+					{
+						for(var i in count)
+						{
+							goods_count[i] = goods_count[i] + count[i];
+							if(goods_count[i] < 0) //數量不能為負
+							{
+								goods_count[i] = goods_count[i] - count[i];
+								socket.emit("luis",'機器人','不好意思，這邊發現您點了'+i+goods_count[i]+'個，不能取消'+(-count[i])+'個','blue');
+								sum_price = sum_price - price;
+								break;
+							}
+						}
+					}
+				   else
+				   {
+					   sum_price = sum_price - goods[count]*goods_count[count];
+					   goods_count[count] = 0;
+				   }
 					socket.emit("luis",'機器人','目前總金額為'+sum_price+'元','blue');
 			   }
 			   else if(closing == true)
