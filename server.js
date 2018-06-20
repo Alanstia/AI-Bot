@@ -60,7 +60,7 @@ io.on('connection', (socket) => {
 			getLuisIntent(temp[1],function(msg,price,count,check,closing,check_good){
 				if(check_good == false)
 				{
-					socket.emit("luis",'機器人',msg,'blue');
+					socket.emit("luis",'麥噹噹',msg,'blue');
 				}
 				else
 				{
@@ -74,13 +74,13 @@ io.on('connection', (socket) => {
 					}
 					if(good_str == '')
 					{
-						socket.emit("luis",'機器人','您沒有點任何餐點呢','blue');
+						socket.emit("luis",'麥噹噹','您沒有點任何餐點呢','blue');
 					}
 					else
 					{
-						socket.emit("luis",'機器人','以下是您點的餐點','blue');
-						socket.emit("luis",'機器人',good_str,'blue');
-						socket.emit("luis",'機器人','目前總金額為'+sum_price+'元','blue');
+						socket.emit("luis",'麥噹噹','以下是您點的餐點','blue');
+						socket.emit("luis",'麥噹噹',good_str,'blue');
+						socket.emit("luis",'麥噹噹','目前總金額為'+sum_price+'元','blue');
 					}
 				}
 				sum_price = sum_price + price;
@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
 							if(goods_count[i] < 0) //數量不能為負
 							{
 								goods_count[i] = goods_count[i] - count[i];
-								socket.emit("luis",'機器人','不好意思，這邊發現您點了'+i+goods_count[i]+'個，不能取消'+(-count[i])+'個','blue');
+								socket.emit("luis",'麥噹噹','不好意思，這邊發現您點了'+i+goods_count[i]+'個，不能取消'+(-count[i])+'個','blue');
 								sum_price = sum_price - price;
 								break;
 							}
@@ -105,11 +105,16 @@ io.on('connection', (socket) => {
 					   sum_price = sum_price - goods[count]*goods_count[count];
 					   goods_count[count] = 0;
 				   }
-					socket.emit("luis",'機器人','目前總金額為'+sum_price+'元','blue');
+					socket.emit("luis",'麥噹噹','目前總金額為'+sum_price+'元','blue');
 			   }
 			   else if(closing == true)
 			   {
-					socket.emit("luis",'機器人','總共是'+sum_price+'元，謝謝惠顧','blue');
+					socket.emit("luis",'麥噹噹','總共是'+sum_price+'元，謝謝惠顧','blue');
+					sum_price = 0;
+					for(var i in goods_count)
+					{
+						goods_count[i] = 0;
+					}
 			   }
             },function(temperature,feel,Rain_probability){
 				//console.log(typeof (Rain_probability-'%'));
