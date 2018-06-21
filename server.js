@@ -3,48 +3,60 @@ const app = express(); //建立一個Express伺服器
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 var getLuisIntent = require('./luis');
-var userpool=[];
+//var userpool=[];
+var socketpool=[];
 var goods = {起士漢堡:50,奶茶:30,麥香雞:55}; //菜單
 var goods_count = {起士漢堡:0,奶茶:0,麥香雞:0}; //點餐的數量，預設為0
-
+function checkusr(name){
+	if(socketpool.length==0){
+		return -1;
+		//裡面為空
+	}
+	else {
+		for(i=0;i<socketpool.length;i++){
+			if(socketpool[i].nickname==name)
+			{	
+				//返回找到的那個index
+				return i;
+			}
+		}
+		//找不到
+		return -1;
+	}
+}
 io.on('connection', (socket) => {
+	
     //socket是指連入的這個socket
     //io.emit對全體廣播
     //socket.broadcast.emit對自己以外的全體做廣播
-
+	
 
     //登入事件
     socket.on("login",(msg)=>{
 		
-        if(userpool.indexOf(msg) > -1){
-            //使用者已存在-->失敗
-             socket.emit("nickNameExist");
-        }
+        
+		if(checkusr(msg)!=-1){
+			socket.emit("nickNameExist");
+		}
         else {
             //成功
-             socket.userIndex = userpool.length;
-             socket.nickname=msg;
-             userpool.push(msg);
+             //socket.userIndex = userpool.length;
+			 socket.nickname=msg;
+			 socketpool.push(socket);
+             //userpool.push(msg);
              //對自己發送登入成功 解開黑窗
              socket.emit("loginSuccess",msg);
              //改變全體人數框
-             io.emit('system', msg, userpool.length, 'login');
+             io.emit('system', msg, socketpool.length, 'login');
         }
     });
 
 
     //離開事件
     socket.on('disconnect', () => {
-		//console.log(userpool.length);
-		for(var i=0; i<userpool.length;i++){
-			if(userpool[i]==socket.nickname){
-				break;
-			}
-		}
-		console.log(i);
-        userpool.splice(i,1);
-        console.log(userpool);
-		socket.broadcast.emit('system', socket.nickname, userpool.length, 'logout');
+		var i=checkusr(socket.nickname);
+		socketpool.splice(i,1);
+		socket.broadcast.emit('system', socket.nickname, socketpool.length, 'logout');
         console.log(socket.nickname+'Bye~');  // 顯示 bye~
     }); 
     
@@ -129,6 +141,25 @@ io.on('connection', (socket) => {
 					socket.emit("luis",'機器人','溫度:'+temperature+'降雨機會:'+Rain_probability+'舒適度: '+feel+' 我們的餐點當然是好吃無比','blue');
 				}
 				
+			},function(){
+				var userstr='';
+				for(i=0;i<socketpool.length;i++){
+					userstr+=socketpool[i].nickname+',';
+				}
+				userstr = userstr.slice(0,-1);
+				socket.emit("luis",'機器人','偷偷告訴你...裡面有'+userstr,'blue');
+				//去除最後的,
+				
+			},function(sale,quantity,count,price,usr){
+				var idx=checkusr(usr);
+				if(idx==-1){
+					socket.emit("luis","機器人",'找不到'+usr+'這個使用者...請確認','blue');
+				}
+				else
+				{
+				socketpool[idx].emit("luis","機器人","有人送了"+quantity+count+sale+'給你嘿嘿不告訴你是誰...');
+				socket.emit("luis","機器人",quantity+count+price+'元的'+sale+'被送給了'+usr);
+				}
 			})
 		   }
        }

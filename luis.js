@@ -12,7 +12,7 @@ getWeather(function(data){
 /*getMenu(function(result){
 	console.log(result);
 });*/
-function getLuisIntent(utterance,callback,callbackweather) {
+function getLuisIntent(utterance,callback,callbackweather,callbackusr,callbackgift) {
 	
     var endpoint =
         "https://westus.api.cognitive.microsoft.com/luis/v2.0/apps/";
@@ -229,6 +229,53 @@ function getLuisIntent(utterance,callback,callbackweather) {
 				}
 				else if(data.topScoringIntent.intent=='推薦'){
 					callbackweather(weather[0],weather[2],weather[3]);
+				}
+				else if(data.topScoringIntent.intent=='詢問使用者'){
+					callbackusr();
+				}
+				else if(data.topScoringIntent.intent=='送禮'){
+					var sales = data.entities.filter(function(item) {
+						return item.type == "商品";
+					});
+					var quantity = data.entities.filter(function(item) {
+						return item.type == "數量";
+					});
+					var count = data.entities.filter(function(item) {
+						return item.type == "量詞";
+					});
+					var user=data.entities.filter(function(item) {
+						return item.type == "使用者";
+					});
+					if(sales.length > 0 && quantity.length > 0 && count.length > 0 && user.length>0)
+					{
+						try
+						{
+							var int_quantity = ChineseToNumber(quantity[0].entity); //中文數字轉成int
+						}
+						catch(err)
+						{
+							callback('抱歉!請您說清楚一點，請附上中文數量(一個,三杯...etc)',price,goods_count,false,false,false);
+							return;
+						}
+						if(typeof goods[sales[0].entity] !== 'undefined') //計算金額和數量
+						{
+							goods_count[sales[0].entity] = int_quantity;
+							//計算金額
+							price = price + (goods[sales[0].entity]*int_quantity);
+							//callback('總共是'+goods[sales[0].entity]*int_quantity+'元',price,goods_count,true,false,false);
+							callbackgift(sales[0].entity,int_quantity,count[0].entity,price,user[0].entity);
+						}
+						else
+						{
+							callback('抱歉!沒有這項商品呢',price,goods_count,false,false,false);
+						}
+					}
+					else
+					{
+						callback('抱歉!請您說清楚一點，請附上中文數量(一個,三杯...etc)',price,goods_count,false,false,false);
+					}
+					//callbackusr(sales[0].entity,quantity[0].entity,count[0].entity,user[0].entity);
+					//console.log(sales[0].entity+' '+quantity.entity+' '+count.entity+' '+user.entity);
 				}
                 else if(data.topScoringIntent.intent=='None'){
                     callback("不好意思，請您說清楚一點",price,goods_count,false,false,false);
