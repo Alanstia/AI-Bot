@@ -148,7 +148,7 @@ io.on('connection', (socket) => {
 					socket.emit("luis",'機器人','溫度: '+temperature+'降雨機會'+Rain_probability+'又熱又悶清涼可口的可樂吧','blue')
 				}
 				else{
-					socket.emit("luis",'機器人','溫度:'+temperature+'降雨機會:'+Rain_probability+'舒適度: '+feel+' 我們的餐點當然是好吃無比','blue');
+					socket.emit("luis",'機器人','溫度:'+temperature+'降雨機會:'+Rain_probability+'舒適度: '+feel+' 餐點當然是好吃無比','blue');
 				}
 				
 			},function(){
