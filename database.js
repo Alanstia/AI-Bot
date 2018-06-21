@@ -9,7 +9,6 @@ const conn = mysql.createConnection({
 
 module.exports = {
     getMenu(callback) {
-        conn.connect();
         var menu = new Array();
         conn.query('SELECT item_id, item_name, item_price FROM AIBotMenu', (error, results, fields)=> {
             if(error) {
@@ -22,6 +21,7 @@ module.exports = {
             
             callback(menu);
         });
+        
     }
 }
 
