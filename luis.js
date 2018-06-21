@@ -3,15 +3,23 @@ require('dotenv').config();
 var request = require('request');
 var getWeather=require('./crawler');
 var querystring = require('querystring');
+const db = require('./database');
 var weather=new Array();
 var temp=0;
 
 getWeather(function(data){
 	weather.push(data);
 });
-/*getMenu(function(result){
-	console.log(result);
-});*/
+
+var goods_count = new Object(); 
+var goods = new Object();
+db.getMenu((menu) => {
+	menu.forEach((item) => {
+		goods[item.item_name] = item.item_price;
+		goods_count[item.item_name] = 0;
+	});
+});
+
 function getLuisIntent(utterance,callback,callbackweather,callbackusr,callbackgift) {
 	
     var endpoint =
@@ -31,8 +39,6 @@ function getLuisIntent(utterance,callback,callbackweather,callbackusr,callbackgi
         "q": utterance
     }
 	
-	var goods = {起士漢堡:50,奶茶:30,麥香雞:55}; //菜單
-	var goods_count = {起士漢堡:0,奶茶:0,麥香雞:0}; //點餐的數量，預設為0
 	var price = 0; //總金額
     var luisRequest =endpoint + luisAppId +'?' + querystring.stringify(queryParams);
 	//中文數字轉成int
