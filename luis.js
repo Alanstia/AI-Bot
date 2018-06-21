@@ -3,14 +3,16 @@ require('dotenv').config();
 var request = require('request');
 var getWeather=require('./crawler');
 var querystring = require('querystring');
-const db = require('./database');
 var weather=new Array();
+const db = require('./database');
 var temp=0;
 
 getWeather(function(data){
 	weather.push(data);
 });
-
+/*getMenu(function(result){
+	console.log(result);
+});*/
 var goods_count = new Object(); 
 var goods = new Object();
 db.getMenu((menu) => {
@@ -19,7 +21,6 @@ db.getMenu((menu) => {
 		goods_count[item.item_name] = 0;
 	});
 });
-
 function getLuisIntent(utterance,callback,callbackweather,callbackusr,callbackgift) {
 	
     var endpoint =
@@ -38,6 +39,7 @@ function getLuisIntent(utterance,callback,callbackweather,callbackusr,callbackgi
         "verbose":  true,
         "q": utterance
     }
+	
 	
 	var price = 0; //總金額
     var luisRequest =endpoint + luisAppId +'?' + querystring.stringify(queryParams);
@@ -109,18 +111,19 @@ function getLuisIntent(utterance,callback,callbackweather,callbackusr,callbackgi
             else {
                 var data = JSON.parse(body);
                 
-                console.log(`Query: ${data.query}`);
-                console.log(`Top Intent: ${data.topScoringIntent.intent}`);
+                //console.log(`Query: ${data.query}`);
+                //console.log(`Top Intent: ${data.topScoringIntent.intent}`);
                 if(data.topScoringIntent.intent=='打招呼'){
 					
                     callback('您好，我是人工智慧點餐系統，代號為002，很高興為您服務!',price,goods_count,false,false,false);
 					var good_string = '';
 					for(var i in goods) //顯示菜單
 					{
-						good_string = good_string + i + ': ' + goods[i] + '<br>';
+						good_string = good_string + i + ': ' + goods[i] + ' ';
 					}
-					good_string = good_string.substring(0, good_string.length-4);//去除最後一個<br>
-					callback('以下是菜單的部分<br>'+good_string,price,goods_count,false,false,false);
+					
+					
+					callback('以下是菜單的部分'+good_string,price,goods_count,false,false,false);
 					
                 }
                 else if(data.topScoringIntent.intent=='點餐'){
