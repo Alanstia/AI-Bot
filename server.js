@@ -2,11 +2,20 @@ const express = require('express');
 const app = express(); //建立一個Express伺服器
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-var getLuisIntent = require('./luis');
+const getLuisIntent = require('./luis');
+var db = require('./database');
 //var userpool=[];
 var socketpool=[];
-var goods = {起士漢堡:50,奶茶:30,麥香雞:55}; //菜單
-var goods_count = {起士漢堡:0,奶茶:0,麥香雞:0}; //點餐的數量，預設為0
+
+var goods_count = new Object(); 
+var goods = new Object();
+db.getMenu((menu) => {
+	menu.forEach((item) => {
+		goods[item.item_name] = item.item_price;
+		goods_count[item.item_name] = 0;
+	});
+});
+
 function checkusr(name){
 	if(socketpool.length==0){
 		return -1;
@@ -118,6 +127,7 @@ io.on('connection', (socket) => {
 					   goods_count[count] = 0;
 				   }
 					socket.emit("luis",'麥噹噹','目前總金額為'+sum_price+'元','blue');
+					console.log(goods_count);
 			   }
 			   else if(closing == true)
 			   {
