@@ -1,10 +1,10 @@
-﻿window.onload = function() {
+window.onload = function() {
     //載入時初始化
     var hichat = new HiChat();
     hichat.init();
 };
 
-//定义我们的hichat类
+
 var HiChat = function() {
     this.socket = null;
     this.nickNamename;
@@ -132,6 +132,7 @@ HiChat.prototype = {
             document.getElementById('messageInput').focus();//让消息输入框获得焦点
         });
         this.socket.on('luis',function(user,msg,color){
+            //console.log(msg);
             that._displayNewMsg(user,msg,color);
         });
         this.socket.on('system', function(nickName, userCount, type) {
@@ -170,15 +171,10 @@ HiChat.prototype = {
             if(msg.length>37){
                 //已中文標準去算
                
-                msgToDisplay.innerHTML+=msg.slice(0,37)+'<br>'+msg.slice(38,83);
-                
-                msgToDisplay.style.height='40px';
+                msgToDisplay.innerHTML+=msg;
+                msgToDisplay.style.height=20+15*(msg.length/37)+'px';
                 msgToDisplay.style.width='734px';
                 msgToDisplay.style.marginLeft='185px';
-                if(msg.length>83){
-                    msgToDisplay.innerHTML+='<br>'+msg.slice(84);
-                    msgToDisplay.style.height=20+15*(msg.length/37)+'px';
-                }
             }
              else{
                 msgToDisplay.innerHTML+=msg;
@@ -188,20 +184,16 @@ HiChat.prototype = {
             
         }
         else{
+           
             msgToDisplay.innerHTML= '<span class="arrow_l_int"></span><span class="arrow_l_out"></span>' +user + '<span class="timespan">(' + date + '): </span>';
             if(msg.length>37){
                 //已中文標準去算
                
-                msgToDisplay.innerHTML+=msg.slice(0,37)+'<br>'+msg.slice(38,83);
-                
-                msgToDisplay.style.height='40px';
+                msgToDisplay.innerHTML+=msg
+                msgToDisplay.style.height=20+15*(msg.length/37)+'px';
                 msgToDisplay.style.width='734px';
-                
-                if(msg.length>83){
-                    msgToDisplay.innerHTML+='<br>'+msg.slice(84);
-                    msgToDisplay.style.height=20+15*(msg.length/37)+'px';
-                }
-            }else{
+            }
+            else{
                 msgToDisplay.innerHTML+=msg;
                 msgToDisplay.style.width=100+16*(user.length+msg.length)+"px";//輸入框長度
             }
