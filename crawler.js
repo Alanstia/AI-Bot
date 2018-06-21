@@ -16,7 +16,7 @@ function getWeather(callback){
         element.each(function (idx, elm) {
             if(idx==12)
             {
-                return false;
+       		return false;
                 //只要第一個table
             }
             if(idx%4==1){
